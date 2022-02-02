@@ -57,12 +57,16 @@ func handler(w http.ResponseWriter, r *http.Request) {
 }
 
 func main() {
-	if len(os.Args) > 2 {
+	if len(os.Args) >= 2 {
 		dirToServe = os.Args[1]
 	} else {
 		dirToServe = "web"
 	}
+	port := "80"
+	if len(os.Args) >= 3{
+		port = os.Args[2] 
+	}
 	http.HandleFunc("/", handler)
-	log.Fatal(http.ListenAndServe(":8080", nil))
+	log.Fatal(http.ListenAndServe(":"+port, nil))
 
 }
