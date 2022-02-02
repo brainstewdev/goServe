@@ -1,3 +1,3 @@
-module webApp
+module goServe
 
 go 1.16
