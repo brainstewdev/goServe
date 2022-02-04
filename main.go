@@ -6,6 +6,7 @@ import (
 	"log"
 	"net/http"
 	"os"
+	"flag"
 )
 
 /*
@@ -86,16 +87,16 @@ func handler(w http.ResponseWriter, r *http.Request) {
 
 func main() {
 	cache = make(map[string]file)
-	if len(os.Args) >= 2 {
-		dirToServe = os.Args[1]
-	} else {
-		dirToServe = "web"
-	}
-	port := "80"
-	if len(os.Args) >= 3{
-		port = os.Args[2] 
-	}
-	http.HandleFunc("/", handler)
-	log.Fatal(http.ListenAndServe(":"+port, nil))
 
+	var dirFlag = flag.String("d", "web", "directory to serve")
+	var portFlag = flag.String("p", "80", "port on which to serve")
+	
+	flag.Parse()
+	
+	dirToServe = *dirFlag
+
+	http.HandleFunc("/", handler)
+	fmt.Println("currently serving", dirToServe, "on port", *portFlag)
+	
+	log.Fatal(http.ListenAndServe(":"+*portFlag, nil))
 }
