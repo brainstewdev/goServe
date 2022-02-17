@@ -17,11 +17,12 @@ type file struct {
 	content []byte
 }
 
+var caching bool
 var dirToServe string
 var cache map[string]file
 
 func readFile(path string) ([]byte, error){
-		if v, ok := cache[path]; ok {
+		if v, ok := cache[path]; ok && caching {
 			// the file is cached, return the associated byte slice
 			return v.content, nil
 		}else{
@@ -36,9 +37,11 @@ func readFile(path string) ([]byte, error){
 			if err != nil{
 				return nil, err
 			}else{
-				// add the file to the cache
-				cache[path] = file{"", data}
-				fmt.Println("\tadded", path, "to the cache")
+				// add the file to the cache if caching is enabled
+				if caching {
+					cache[path] = file{"", data}
+					fmt.Println("\tadded", path, "to the cache")
+				}
 				return  data, nil
 			}
 		}
@@ -86,15 +89,20 @@ func handler(w http.ResponseWriter, r *http.Request) {
 }
 
 func main() {
-	cache = make(map[string]file)
-
+	
 	var dirFlag = flag.String("d", "web", "directory to serve")
 	var portFlag = flag.String("p", "80", "port on which to serve")
-	
+	var cachingFlag = flag.Bool("nc", false,  "disable caching")
 	flag.Parse()
 	
 	dirToServe = *dirFlag
-
+	if !(*cachingFlag) {
+		fmt.Println("caching enabled")
+		cache = make(map[string]file)
+		caching = true
+	}else{
+		fmt.Println("caching disabled")
+	}
 	http.HandleFunc("/", handler)
 	fmt.Println("currently serving", dirToServe, "on port", *portFlag)
 	
